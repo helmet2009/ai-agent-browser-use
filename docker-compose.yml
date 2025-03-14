@@ -5,6 +5,8 @@ services:
     ports:
       - "8000:8000"
     restart: always
+    depends_on:
+      - deepseek
 
   frontend:
     build: ./frontend
@@ -15,4 +17,8 @@ services:
   deepseek:
     build: ./models/deepseek
     restart: always
-  # เพิ่ม service สำหรับโมเดลอื่น ๆ ในอนาคต
+    # port mapping ถ้าโมเดลให้บริการ API ภายใน container
+    ports:
+      - "8500:8500"
+
+  # เพิ่ม services สำหรับโมเดลอื่น ๆ ที่คุณมีในอนาคต
