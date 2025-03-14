@@ -1,0 +1,44 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build Docker Images for DeepSeek Model
+        run: |
+          docker build -t ai-model:deepseek -f models/deepseek/Dockerfile models/deepseek
+
+      - name: Build Docker Image for Backend
+        run: |
+          docker build -t backend:latest -f backend/Dockerfile backend
+
+      - name: Build Docker Image for Frontend
+        run: |
+          docker build -t frontend:latest -f frontend/Dockerfile frontend
+
+      - name: Run Tests
+        run: |
+          # รัน unit test หรือ integration test ที่เตรียมไว้
+          echo "Running tests..."
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /path/to/deployment
+            docker-compose pull
+            docker-compose up -d
